@@ -1,0 +1,57 @@
+.mid-container{
+  background: linear-gradient(
+    rgba(192, 192, 192, 0.7),
+    rgba(255, 255, 255, 0.8)
+  );
+  width:99vw;
+  height: 50vh;
+  font-weight: bold;
+  border-radius: 20px;
+  box-shadow: 10px 10px 38px 0px rgba(0, 0, 0, 0.75);
+  display: inline-flex;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.set-container{
+  
+  width:45vw;
+  height: 50vh;
+  font-weight: bold;
+  border-radius: 20px;
+  display: inline-flex;
+  margin-left: 10px;
+}
+.report-status {
+  
+  position: absolute;
+  font-weight: bold;
+  margin-left:2rem;
+  margin-top: 1rem;
+  font-size: 24px;
+}
+
+.daily-report {
+  margin-left:-26rem;
+  margin-right: 0.5rem;
+  margin-top: 3.5rem;
+}
+.pressure-container,
+.timeclean-container {
+  width: 21.5vw;
+  font-size: 18px;
+  margin: 60px 0px 10px 10px;
+  border-radius: 20px;
+  border: 3px solid;
+}
+.valve-list,
+.motor-list,
+.motor-state,
+.valve-state,
+.time-clean,
+.time-convert,
+.set-pressure {
+  margin: 22px;
+  list-style: none;
+  line-height: 28px;
+}
