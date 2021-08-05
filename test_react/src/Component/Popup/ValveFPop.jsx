@@ -38,6 +38,9 @@ function ValvePop(props) {
       } else if (data === 1) {
         setMode("MAN");
       }
+      else if (data === 3) {
+        setMode("Service");
+      }
     });
     socket.on(`ns=3;s="${props.on}"."OPENED"`, (data) => {
       setOpened(data);
@@ -52,7 +55,7 @@ function ValvePop(props) {
 
   ///Mode
   const btnSetClick = async () => {
-    await socket.emit(`"${props.emit}"."MODE"`, modeSet);
+    await socket.emit(`${props.emit}_MODE`, modeSet);
   };
 
   ///Set Open
@@ -88,6 +91,7 @@ function ValvePop(props) {
                   id="modeSelect"
                   onChange={(e) => setModeSet(e.target.value)}
                 >
+                  <option value="3"> Service </option>
                   <option value="2"> Auto </option>
                   <option value="1"> Man </option>
                 </Input>

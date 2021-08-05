@@ -196,7 +196,7 @@ function MainSection2() {
   const [speedPump4, setSpeedPump4] = useState(null);
   const [speedPump5, setSpeedPump5] = useState(null);
   const [speedPump6, setSpeedPump6] = useState(null);
-  /////
+ 
   /// Connect io
   useEffect(() => {
     socket = io(CONNECTION_PORT);
@@ -233,6 +233,7 @@ function MainSection2() {
     socket.on(  'ns=3;s="Pump_6"."Speed"', (data) => {
       setSpeedPump6(data);
     });
+    
    // ----------------Pump State--------///
     socket.on(  'ns=3;s="Pump_1"."FEEDBACK"', (data) => {
       setStatePump1(data);

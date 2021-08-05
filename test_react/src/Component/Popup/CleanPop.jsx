@@ -48,7 +48,7 @@ function CleanPop() {
               <Input
                 className="setspeed"
                 placeholder="0 minutes"
-                onChange={(e) => setTime1(e.target.value*1000)}
+                onChange={(e) => setTime1(e.target.value)}
               />
               <Button className="btnset" onClick={btnSet1}>
                 {" "}
@@ -60,7 +60,7 @@ function CleanPop() {
               <Input
                 className="setspeed"
                 placeholder="0 minutes"
-                onChange={(e) => setTime2(e.target.value*1000)}
+                onChange={(e) => setTime2(e.target.value)}
               />
               <Button className="btnset" onClick={btnSet2}>
                 {" "}
@@ -78,8 +78,8 @@ function CleanPop() {
               <Label>Convert Pump 2,3 </Label>
               <Input
                 className="setspeed"
-                placeholder="0 minutes"
-                onChange={(e) => setTime3(e.target.value*1000)}
+                placeholder="0 Hour"
+                onChange={(e) => setTime3(e.target.value)}
               />
               <Button className="btnset" onClick={btnSet3}>
                 {" "}
@@ -90,8 +90,8 @@ function CleanPop() {
               <Label> Convert Pump 4,5 </Label>
               <Input
                 className="setspeed"
-                placeholder="0 minutes"
-                onChange={(e) => setTime4(e.target.value*1000)}
+                placeholder="0 Hour"
+                onChange={(e) => setTime4(e.target.value)}
               />
               <Button className="btnset" onClick={btnSet4}>
                 {" "}

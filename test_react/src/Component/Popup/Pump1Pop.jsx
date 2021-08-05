@@ -25,6 +25,7 @@ function PumpPop(props) {
   const [fault, setFault] = useState(false);
   const [speed, setSpeed] = useState([]);
   const [speedSet, setSpeedSet] = useState([]);
+  const [time, setTime] = useState([]);
 
   /// Connect
   useEffect(() => {
@@ -39,6 +40,9 @@ function PumpPop(props) {
       } else if (data === 1) {
         setMode("MAN");
       }
+      else if (data === 3) {
+        setMode("SERVICE");
+      }
     });
     ////
     socket.on(`ns=3;s="${props.on}"."FEEDBACK"`, (data) => {
@@ -52,7 +56,12 @@ function PumpPop(props) {
     socket.on(`ns=3;s="${props.on}"."Speed"`, (data) => {
       setSpeed(data);
     });
+
+  // 
+  socket.on(`ns=3;s="${props.on}"."RUNNINGTIME"`, (data) => {
+    setTime(data);
   });
+});
 
   ///Mode
   const btnSetMode = async (e) => {
@@ -71,7 +80,7 @@ function PumpPop(props) {
   };
 
   const btnSetSpeed = async () => {
-    await socket.emit(`Setspeed_${props.emit}`, speedSet);
+    await socket.emit(`SetSpeed_${props.emit}`, speedSet);
   };
 
   return (
@@ -93,8 +102,9 @@ function PumpPop(props) {
                 id="modeSelect"
                 onChange={(e) => setModeSet(e.target.value)}
               >
-                <option value="2"> Auto </option>
                 <option value="1"> Man </option>
+                <option value="2"> Auto </option>
+                <option value="3"> Service </option>
               </Input>
               <Button className="btnset" onClick={btnSetMode}>
                 Set
@@ -141,7 +151,7 @@ function PumpPop(props) {
           <div className="pump-set">
             <FormGroup>
             <FormGroup>
-              <Label>Running time: {speed} minutes</Label>
+              <Label>Running time: {time} minutes</Label>
             </FormGroup>
               <Label>Set speed</Label>
               <Input

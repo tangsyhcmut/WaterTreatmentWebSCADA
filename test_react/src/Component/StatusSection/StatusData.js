@@ -81,15 +81,15 @@ function StatusData() {
           <Row>
             <ul className="time-clean">
               Time Clean
-              <li>Time Backwash: {timeRinse / 1000} minutes</li>
-              <li>Time Rinse: {timeBackwash / 1000} minutes</li>
+              <li>Time Backwash: {timeRinse} minutes</li>
+              <li>Time Rinse: {timeBackwash} minutes</li>
             </ul>
           </Row>
           <Row>
             <ul className="time-convert">
               Time Convert
-              <li>Convert Pump 2,3 : {timecovert23 / 1000} minutes</li>
-              <li>Convert Pump 4,5 : {timecovert45 / 1000} minutes</li>
+              <li>Convert Pump 2,3 : {timecovert23} hours</li>
+              <li>Convert Pump 4,5 : {timecovert45} hours</li>
             </ul>
           </Row>
         </FormGroup>
@@ -103,9 +103,9 @@ function StatusData() {
               <li>Filter Tank 2 Pressure: {pressure2} Bar</li>
               <li>RO Pressure:{pressure3} Bar</li>
               <br></br>
-              <li>Filter Tank 1 Flow: {flow1} m3/s</li>
-              <li>Filter Tank 2 Flow: {flow2} m3/s</li>
-              <li>RO Flow:{flow3} m3/s</li>
+              <li>Filter Tank 1 Flow: {flow1} m3/h</li>
+              <li>Filter Tank 2 Flow: {flow2} m3/h</li>
+              <li>RO Flow:{flow3} m3/h</li>
             </ul>
           </Row>
         </FormGroup>

@@ -17,7 +17,7 @@ module.exports.generateFaultAlarm = function (data,id) {
 	if(data) {	
 				warnObj = {
 					type: "Fault",
-					warnMsg: id +' is fault!!!'
+					warnMsg: id +' fault'
 				}
 				const data_alarm= new dataSchema.AlarmData(warnObj);
 				data_alarm.save();	

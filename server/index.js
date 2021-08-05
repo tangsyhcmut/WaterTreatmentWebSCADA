@@ -103,7 +103,7 @@ const io = require("socket.io")(server, {
           // console.log(nodeIdToMonitor);
           return callback(dataValue);
         });
-      } catch (error) {}
+      } catch (error) { }
     }
 
     // //---------------FC Read 2-------------
@@ -124,7 +124,7 @@ const io = require("socket.io")(server, {
       var nodesToWrite = [
         {
           nodeId: setPointTemperatureId,
-          attributeId: AttributeIds.Value, 
+          attributeId: AttributeIds.Value,
           value: {
             value: {
               dataType: Type,
@@ -139,22 +139,22 @@ const io = require("socket.io")(server, {
         }
       });
     }
-     //----------REPORT------------------
-     const maxAge = 0;
-     const nodeF1 = {
-       nodeId: 'ns=3;s="FLow_FA_IN"',
-       attributeId: AttributeIds.Value,
-     };
-     const nodeF2 = {
-       nodeId: 'ns=3;s="FLow_FB_IN"',
-       attributeId: AttributeIds.Value,
-     };
-     const nodeF3 = {
-       nodeId: 'ns=3;s="FLow_RO_IN"',
-       attributeId: AttributeIds.Value,
-     };
+    //----------REPORT------------------
+    const maxAge = 0;
+    const nodeF1 = {
+      nodeId: 'ns=3;s="FLow_FA_IN"',
+      attributeId: AttributeIds.Value,
+    };
+    const nodeF2 = {
+      nodeId: 'ns=3;s="FLow_FB_IN"',
+      attributeId: AttributeIds.Value,
+    };
+    const nodeF3 = {
+      nodeId: 'ns=3;s="FLow_RO_IN"',
+      attributeId: AttributeIds.Value,
+    };
 
-     const nodeP1 = {
+    const nodeP1 = {
       nodeId: 'ns=3;s="PS1_M"',
       attributeId: AttributeIds.Value,
     };
@@ -167,51 +167,94 @@ const io = require("socket.io")(server, {
       attributeId: AttributeIds.Value,
     };
 
-     let flag = 0;
- 
-     setInterval(async () => {
-       flag = flag + 1;
-       const dataF1 = await session.read(nodeF1, maxAge);
-       const dataF2 = await session.read(nodeF2, maxAge);
-       const dataF3 = await session.read(nodeF3, maxAge);
-      
-       const dataP1 = await session.read(nodeP1, maxAge);
-       const dataP2 = await session.read(nodeP2, maxAge);
-       const dataP3 = await session.read(nodeP3, maxAge);
+    let flag = 0;
 
-       if (flag > 3 ) {
-         const F = {
-           F1: dataF1.value.value,
-           F2: dataF2.value.value,
-           F3: dataF3.value.value,
-           
+    setInterval(async () => {
+      flag = flag + 1;
+      const dataF1 = await session.read(nodeF1, maxAge);
+      const dataF2 = await session.read(nodeF2, maxAge);
+      const dataF3 = await session.read(nodeF3, maxAge);
+
+      const dataP1 = await session.read(nodeP1, maxAge);
+      const dataP2 = await session.read(nodeP2, maxAge);
+      const dataP3 = await session.read(nodeP3, maxAge);
+
+      if (flag > 3) {
+        const F = {
+          F1: dataF1.value.value,
+          F2: dataF2.value.value,
+          F3: dataF3.value.value,
+
         };
         const P = {
           P1: dataP1.value.value,
           P2: dataP2.value.value,
           P3: dataP3.value.value,
-       };
-         const data1 = new DataSchema.TestData(F);
-         const data2 = new DataSchema.PressureData(P)
-         data1.save();
-         data2.save();
-         flag = 0;
-       }
-     }, 1000);
-     //****************-------FAILT ALARM************************************* */
-     const nodereadsfaults = nodeOPC.Nodereadsfaults;
-     // --------------------Tracking Fault----------------//
-     for (let index = 0; index < nodereadsfaults.length; index++) {
-       const nodeIDF = nodereadsfaults[index];
-       let Str = nodeIDF.replace('"',''); 
-       Str = Str.replace('ns=3;s=',''); 
-       Str = Str.replace('_Fault"','');
+        };
+        const data1 = new DataSchema.TestData(F);
+        const data2 = new DataSchema.PressureData(P)
+        data1.save();
+        data2.save();
+        flag = 0;
+      }
+    }, 1000);
+
+
+
+    //****************-------FAILT ALARM************************************* */
+    const nodereadsfaults = nodeOPC.Nodereadsfaults;
+    // --------------------Tracking Fault----------------//
+    for (let index = 0; index < nodereadsfaults.length; index++) {
+      const nodeIDF = nodereadsfaults[index];
+      let Str = nodeIDF.replace('"', '');
+      Str = Str.replace('ns=3;s=', '');
+      Str = Str.replace('"."FAULT"', '');
       //  console.log(Str);
-       readNodeMonitor(nodeIDF, (dataValue) => {
-         alarm.generateFaultAlarm(dataValue.value.value, Str);
-       });
-     }
-   
+      readNodeMonitor(nodeIDF, (dataValue) => {
+        alarm.generateFaultAlarm(dataValue.value.value, Str);
+
+        //  -----------------------------Get Time--------------------------//
+        let now = new Date();
+        function formatted_date(time) {
+          var result = "";
+          var d = new Date();
+          var e = d.getHours()
+
+          result += d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear() +
+            " " + e + ":" + d.getMinutes()
+          return result;
+        }
+        let localtime = formatted_date(now)
+
+        var nodemailer = require('nodemailer');
+        var text = 'Hello ! This email as an update to you system.\n' + Str + ' fault' + ' At ' + localtime;
+        console.log(text);
+        var transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: 'huufuks99@gmail.com',
+            pass: 'le6minhhuu74phuc1'
+          }
+        });
+
+        var mailOptions = {
+          from: 'huufuks99@gmail.com',
+          to: 'tangsy18299@gmail.com',
+          subject: 'System Warning',
+          text: text,
+
+        };
+        if (dataValue.value.value) {
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+        }
+      });
+    }
     //------------Read NODE SEND to FE-----------------------///
     io.on("connection", (socket) => {
       console.log(socket.id);
@@ -231,7 +274,7 @@ const io = require("socket.io")(server, {
             nodeID == 'ns=3;s="Pump_3"."Speed"' ||
             nodeID == 'ns=3;s="Pump_4"."Speed"' ||
             nodeID == 'ns=3;s="Pump_5"."Speed"' ||
-            nodeID == 'ns=3;s="Pump_6"."Speed"' 
+            nodeID == 'ns=3;s="Pump_6"."Speed"'
 
           ) {
             socket.emit(nodeID, dataValue.value.value.toFixed(2));
@@ -240,7 +283,7 @@ const io = require("socket.io")(server, {
           }
         });
       }
-    
+
       // const nodereads2 = [  'ns=3;s="PS1_M"',
       //  'ns=3;s="PS2_M"',
       //  'ns=3;s="PS3_M"'];
@@ -267,11 +310,11 @@ const io = require("socket.io")(server, {
         WriteNode(node, DataType.Boolean, false);
       });
       ////////////////////////////--------------------Setmode
-      socket.on("VAF_MODE", (message) => {
+      socket.on("VF_MODE", (message) => {
         let VM = 5;
         // console.log(typeof message);
-        if (message === "0") {
-          VM = 0;
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -285,8 +328,8 @@ const io = require("socket.io")(server, {
       socket.on("VA1_MODE", (message) => {
         let VM = 5;
         // console.log(typeof message);
-        if (message === "0") {
-          VM = 0;
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -299,9 +342,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VA2_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -314,9 +357,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VA3_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -329,9 +372,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VA4_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -344,9 +387,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VA5_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -359,9 +402,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VB1_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -374,9 +417,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VB2_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -389,9 +432,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VB3_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -404,9 +447,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VB4_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -419,9 +462,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VB5_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -434,9 +477,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VC1_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -449,9 +492,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VC2_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -464,9 +507,9 @@ const io = require("socket.io")(server, {
       });
       socket.on("VC3_MODE", (message) => {
         let VM = 5;
-      
-        if (message === "0") {
-          VM = 0;
+
+        if (message === "3") {
+          VM = 3;
         }
         if (message === "2") {
           VM = 2;
@@ -478,11 +521,11 @@ const io = require("socket.io")(server, {
         WriteNode('ns=3;s="VC3"."MODE"', DataType.Int16, VM);
       });
       ////
-      socket.on("Pump1_MODE", (message) => {
+      socket.on("Pump_1_MODE", (message) => {
         let PM = 5;
-      
-        if (message === "0") {
-          PM = 0;
+
+        if (message === "3") {
+          PM = 3;
         }
         if (message === "2") {
           PM = 2;
@@ -493,11 +536,11 @@ const io = require("socket.io")(server, {
 
         WriteNode('ns=3;s="Pump_1"."MODE"', DataType.Int16, PM);
       });
-      socket.on("Pump2_MODE", (message) => {
+      socket.on("Pump_2_MODE", (message) => {
         let PM = 5;
-      
-        if (message === "0") {
-          PM = 0;
+
+        if (message === "3") {
+          PM = 3;
         }
         if (message === "2") {
           PM = 2;
@@ -508,11 +551,11 @@ const io = require("socket.io")(server, {
 
         WriteNode('ns=3;s="Pump_2"."MODE"', DataType.Int16, PM);
       });
-      socket.on("Pump3_MODE", (message) => {
+      socket.on("Pump_3_MODE", (message) => {
         let PM = 5;
-      
-        if (message === "0") {
-          PM = 0;
+
+        if (message === "3") {
+          PM = 3;
         }
         if (message === "2") {
           PM = 2;
@@ -523,11 +566,11 @@ const io = require("socket.io")(server, {
 
         WriteNode('ns=3;s="Pump_3"."MODE"', DataType.Int16, PM);
       });
-      socket.on("Pump4_MODE", (message) => {
+      socket.on("Pump_4_MODE", (message) => {
         let PM = 5;
-      
-        if (message === "0") {
-          PM = 0;
+
+        if (message === "3") {
+          PM = 3;
         }
         if (message === "2") {
           PM = 2;
@@ -538,11 +581,11 @@ const io = require("socket.io")(server, {
 
         WriteNode('ns=3;s="Pump_4"."MODE"', DataType.Int16, PM);
       });
-      socket.on("Pump5_MODE", (message) => {
+      socket.on("Pump_5_MODE", (message) => {
         let PM = 5;
-      
-        if (message === "0") {
-          PM = 0;
+
+        if (message === "3") {
+          PM = 3;
         }
         if (message === "2") {
           PM = 2;
@@ -553,11 +596,11 @@ const io = require("socket.io")(server, {
 
         WriteNode('ns=3;s="Pump_5"."MODE"', DataType.Int16, PM);
       });
-      socket.on("Pump6_MODE", (message) => {
+      socket.on("Pump_6_MODE", (message) => {
         let PM = 5;
-      
-        if (message === "0") {
-          PM = 0;
+
+        if (message === "3") {
+          PM = 3;
         }
         if (message === "2") {
           PM = 2;
@@ -610,13 +653,13 @@ const io = require("socket.io")(server, {
       // });
 
       socket.on("Clean_Rinse", (message) => {
-        WriteNode('ns=3;s="DataSystem"."Time_Rinse"', DataType.Int32, message);
+        WriteNode('ns=3;s="DataSystem"."Time_Rinse"', DataType.UInt32, message);
         console.log(message);
       });
       socket.on("Clean_Backwash", (message) => {
         WriteNode(
           'ns=3;s="DataSystem"."Time_Backwash"',
-          DataType.Int32,
+          DataType.UInt32,
           message
         );
       });
@@ -624,14 +667,14 @@ const io = require("socket.io")(server, {
         console.log(message);
         WriteNode(
           'ns=3;s="DataSystem"."TimeInvertPump23"',
-          DataType.Int32,
+          DataType.UInt32,
           message
         );
       });
       socket.on("Convert45", (message) => {
         WriteNode(
           'ns=3;s="DataSystem"."TimeInvertPump45"',
-          DataType.Int32,
+          DataType.UInt32,
           message
         );
       });
